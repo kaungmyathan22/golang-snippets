@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql" // New import
 )
 
 type Config struct {
@@ -21,6 +24,7 @@ func main() {
 	cfg := new(Config)
 	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
 	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
+	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL database url")
 	flag.Parse()
 
 	// f, err := os.OpenFile("./logs/info.log", os.O_RDWR|os.O_CREATE, 0666)
@@ -36,6 +40,12 @@ func main() {
 		errorLog: errorLog,
 		infoLog:  infoLog,
 	}
+
+	db, err := app.openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	defer db.Close()
 
 	srv := &http.Server{
 		Addr:     cfg.Addr,
@@ -55,6 +65,18 @@ func main() {
 	}()
 
 	// Wait for the error channel to receive an error or close
-	err := <-errCh
+	err = <-errCh
 	errorLog.Fatal(err) // Log and exit gracefully
+}
+
+func (app *application) openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	app.infoLog.Println("Successfully connected to the database.")
+	return db, nil
 }
