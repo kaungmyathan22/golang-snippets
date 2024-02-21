@@ -9,9 +9,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from Snippetbox"))
 }
 
+func showSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display a specific snippet..."))
+}
+
+// Add a createSnippet handler function.
+func createSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
+	mux.HandleFunc("/snippet", showSnippet)
+	mux.HandleFunc("/snippet/create", createSnippet)
+
 	log.Println("Starting server on :4000")
 	errCh := make(chan error, 1)
 
@@ -24,8 +36,6 @@ func main() {
 	}()
 
 	// Wait for the error channel to receive an error or close
-	select {
-	case err := <-errCh:
-		log.Fatal(err) // Log and exit gracefully
-	}
+	err := <-errCh
+	log.Fatal(err) // Log and exit gracefully
 }
