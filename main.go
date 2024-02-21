@@ -19,6 +19,11 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 
 // Add a createSnippet handler function.
 func createSnippet(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(405)
+		w.Write([]byte("Method Not Allowed"))
+		return
+	}
 	w.Write([]byte("Create a new snippet..."))
 }
 
