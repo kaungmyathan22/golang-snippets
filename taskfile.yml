@@ -2,7 +2,7 @@ version: '3'
 tasks:
   :build:
     cmds:
-      - 'go build -o dist/main ./main.go'
+      - 'go build -o dist/main ./cmd/web/main.go'
     sources:
       - ./*.go,
       - ./**/*.go
