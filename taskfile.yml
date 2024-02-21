@@ -2,10 +2,11 @@ version: '3'
 tasks:
   :build:
     cmds:
-      - 'go build -o dist/main ./cmd/web/main.go'
+      - 'go build -o dist/main ./cmd/web/*.go'
     sources:
       - ./*.go,
       - ./**/*.go
+      - ./**/*.tmpl
 
   :start:
     cmds:
@@ -14,3 +15,4 @@ tasks:
     sources:
       - ./*.go,
       - ./**/*.go
+      - ./**/*.tmpl
