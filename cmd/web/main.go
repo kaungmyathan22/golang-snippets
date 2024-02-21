@@ -18,13 +18,13 @@ func main() {
 	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
 	flag.Parse()
 
-	f, err := os.OpenFile("./logs/info.log", os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
+	// f, err := os.OpenFile("./logs/info.log", os.O_RDWR|os.O_CREATE, 0666)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer f.Close()
 
-	infoLog := log.New(f, "INFO\t", log.Ldate|log.Ltime)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	mux := http.NewServeMux()
@@ -47,6 +47,6 @@ func main() {
 	}()
 
 	// Wait for the error channel to receive an error or close
-	err = <-errCh
+	err := <-errCh
 	errorLog.Fatal(err) // Log and exit gracefully
 }
