@@ -16,6 +16,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
 		"./ui/html/home.page.tmpl",
 		"./ui/html/base.layout.tmpl",
+		"./ui/html/footer.partial.tmpl",
 	}
 	// Use the template.ParseFiles() function to read the files and store the
 	// templates in a template set. Notice that we can pass the slice of file p
@@ -31,7 +32,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
-	w.Write([]byte("Hello from Snippetbox"))
 }
 
 func showSnippet(w http.ResponseWriter, r *http.Request) {
