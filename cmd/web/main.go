@@ -8,6 +8,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql" // New import
+	"github.com/kaungmyathan22/golang-sinppets/pkg/models/mysql"
 )
 
 type Config struct {
@@ -18,7 +19,13 @@ type Config struct {
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
+
+var (
+	infoLog  = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+)
 
 func main() {
 	cfg := new(Config)
@@ -33,15 +40,14 @@ func main() {
 	// }
 	// defer f.Close()
 
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	db, err := openDB(*dsn)
 
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 
-	db, err := app.openDB(*dsn)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -69,7 +75,7 @@ func main() {
 	errorLog.Fatal(err) // Log and exit gracefully
 }
 
-func (app *application) openDB(dsn string) (*sql.DB, error) {
+func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -77,6 +83,6 @@ func (app *application) openDB(dsn string) (*sql.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-	app.infoLog.Println("Successfully connected to the database.")
+	infoLog.Println("Successfully connected to the database.")
 	return db, nil
 }
