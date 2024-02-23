@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 
 	_ "github.com/go-sql-driver/mysql" // New import
 	"github.com/kaungmyathan22/golang-sinppets/pkg/models/mysql"
@@ -17,9 +18,10 @@ type Config struct {
 }
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	snippets *mysql.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *mysql.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 var (
@@ -33,7 +35,6 @@ func main() {
 	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL database url")
 	flag.Parse()
-
 	// f, err := os.OpenFile("./logs/info.log", os.O_RDWR|os.O_CREATE, 0666)
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -42,16 +43,19 @@ func main() {
 
 	db, err := openDB(*dsn)
 
-	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		snippets: &mysql.SnippetModel{DB: db},
-	}
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 	defer db.Close()
+
+	templateCache, err := newTemplateCache("./ui/html/")
+
+	app := &application{
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		snippets:      &mysql.SnippetModel{DB: db},
+		templateCache: templateCache,
+	}
 
 	srv := &http.Server{
 		Addr:     cfg.Addr,
