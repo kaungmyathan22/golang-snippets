@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 	"text/template"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql" // New import
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/kaungmyathan22/golang-sinppets/pkg/models/mysql"
 )
 
@@ -33,7 +34,9 @@ func main() {
 	cfg := new(Config)
 	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
 	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
-	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL database url")
+
+	dsn := flag.String("dsn", "root:rootpassword@tcp(localhost:3306)/snippetbox?parseTime=true&tls=skip-verify", "MySQL data source name")
+
 	flag.Parse()
 	// f, err := os.OpenFile("./logs/info.log", os.O_RDWR|os.O_CREATE, 0666)
 	// if err != nil {
@@ -58,7 +61,6 @@ func main() {
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
-
 	srv := &http.Server{
 		Addr:     cfg.Addr,
 		ErrorLog: errorLog,
@@ -89,6 +91,9 @@ func openDB(dsn string) (*sql.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(5)
 	infoLog.Println("Successfully connected to the database.")
 	return db, nil
 }
