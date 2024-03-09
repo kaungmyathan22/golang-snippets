@@ -10,6 +10,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 	"github.com/kaungmyathan22/golang-sinppets/pkg/models/mysql"
 )
 
@@ -22,6 +23,7 @@ type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
 	snippets      *mysql.SnippetModel
+	session       *sessions.Session
 	templateCache map[string]*template.Template
 }
 
@@ -34,7 +36,7 @@ func main() {
 	cfg := new(Config)
 	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
 	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
-
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
 	dsn := flag.String("dsn", "root:rootpassword@tcp(localhost:3306)/snippetbox?parseTime=true&tls=skip-verify", "MySQL data source name")
 
 	flag.Parse()
@@ -55,10 +57,15 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
 		snippets:      &mysql.SnippetModel{DB: db},
+		session:       session,
 		templateCache: templateCache,
 	}
 	srv := &http.Server{
