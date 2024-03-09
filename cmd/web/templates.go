@@ -5,13 +5,16 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/kaungmyathan22/golang-sinppets/pkg/forms"
 	"github.com/kaungmyathan22/golang-sinppets/pkg/models"
 )
 
 type templateData struct {
 	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
+
+	Form     *forms.Form
+	Snippet  *models.Snippet
+	Snippets []*models.Snippet
 }
 
 var functions = template.FuncMap{
