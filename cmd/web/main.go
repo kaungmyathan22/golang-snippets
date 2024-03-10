@@ -89,7 +89,8 @@ func main() {
 
 	// Start the server in a goroutine and check for errors
 	go func() {
-		err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+		// err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+		err = srv.ListenAndServe()
 		if err != nil {
 			errCh <- err
 		}
