@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"log"
@@ -68,10 +69,19 @@ func main() {
 		session:       session,
 		templateCache: templateCache,
 	}
+
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 	srv := &http.Server{
-		Addr:     cfg.Addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:         cfg.Addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting server on %s\n", cfg.Addr)
@@ -79,7 +89,7 @@ func main() {
 
 	// Start the server in a goroutine and check for errors
 	go func() {
-		err := srv.ListenAndServe()
+		err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 		if err != nil {
 			errCh <- err
 		}
