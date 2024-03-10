@@ -17,6 +17,7 @@ type templateData struct {
 	User              *models.User
 	Snippet           *models.Snippet
 	Snippets          []*models.Snippet
+	CSRFToken         string
 }
 
 var functions = template.FuncMap{
